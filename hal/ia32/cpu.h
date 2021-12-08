@@ -17,55 +17,58 @@
 #ifndef _HAL_CPU_H_
 #define _HAL_CPU_H_
 
+#include "types.h"
+#include "../../include/arch.h"
 
-#define SIZE_PAGE         0x1000
+
+#define SIZE_PAGE _PAGE_SIZE
 
 
 /* Default kernel and user stack sizes */
 #ifndef SIZE_KSTACK
-#define SIZE_KSTACK       (8 * 512)
+#define SIZE_KSTACK (8 * 512)
 #endif
 
 #ifndef SIZE_USTACK
-#define SIZE_USTACK       (8 * SIZE_PAGE)
+#define SIZE_USTACK (8 * SIZE_PAGE)
 #endif
 
 
 /* Bitfields used to construct interrupt descriptors */
-#define IGBITS_DPL0       0x00000000
-#define IGBITS_DPL3       0x00006000
-#define IGBITS_PRES       0x00008000
-#define IGBITS_SYSTEM     0x00000000
-#define IGBITS_IRQEXC     0x00000e00
-#define IGBITS_TRAP       0x00000f00
-#define IGBITS_TSS        0x00000500
+#define IGBITS_DPL0   0x00000000
+#define IGBITS_DPL3   0x00006000
+#define IGBITS_PRES   0x00008000
+#define IGBITS_SYSTEM 0x00000000
+#define IGBITS_IRQEXC 0x00000e00
+#define IGBITS_TRAP   0x00000f00
+#define IGBITS_TSS    0x00000500
 
 
 /* Bitfields used to construct segment descriptors */
-#define DBITS_4KB         0x00800000    /* 4KB segment granularity */
-#define DBITS_1B          0x00000000    /* 1B segment granularity */
+#define DBITS_4KB 0x00800000 /* 4KB segment granularity */
+#define DBITS_1B  0x00000000 /* 1B segment granularity */
 
-#define DBITS_CODE32      0x00400000    /* 32-bit code segment */
-#define DBITS_CODE16      0x00000000    /* 16-bit code segment */
+#define DBITS_CODE32 0x00400000 /* 32-bit code segment */
+#define DBITS_CODE16 0x00000000 /* 16-bit code segment */
 
-#define DBITS_PRESENT     0x00008000    /* present segment */
-#define DBITS_NOTPRESENT  0x00000000    /* segment not present in the physcial memory*/
+#define DBITS_PRESENT    0x00008000 /* present segment */
+#define DBITS_NOTPRESENT 0x00000000 /* segment not present in the physcial memory*/
 
-#define DBITS_DPL0        0x00000000    /* kernel privilege level segment */
-#define DBITS_DPL3        0x00006000    /* user privilege level segment */
+#define DBITS_DPL0 0x00000000 /* kernel privilege level segment */
+#define DBITS_DPL3 0x00006000 /* user privilege level segment */
 
-#define DBITS_SYSTEM      0x00000000    /* segment used by system */
-#define DBITS_APP         0x00001000    /* segment used by application */
+#define DBITS_SYSTEM 0x00000000 /* segment used by system */
+#define DBITS_APP    0x00001000 /* segment used by application */
 
-#define DBITS_CODE        0x00000800    /* code segment descriptor */
-#define DBITS_DATA        0x00000000    /* data segment descriptor */
+#define DBITS_CODE 0x00000800 /* code segment descriptor */
+#define DBITS_DATA 0x00000000 /* data segment descriptor */
 
-#define DBITS_EXPDOWN     0x00000400    /* data segment is expandable down */
-#define DBITS_WRT         0x00000200    /* writing to data segment is permitted */
-#define DBITS_ACCESIBLE   0x00000100    /* data segment is accesible */
+#define DBITS_EXPDOWN   0x00000400 /* data segment is expandable down */
+#define DBITS_WRT       0x00000200 /* writing to data segment is permitted */
+#define DBITS_ACCESIBLE 0x00000100 /* data segment is accesible */
 
-#define DBITS_CONFORM     0x00000400    /* conforming code segment */
-#define DBITS_READ        0x00000200    /* read from code segment is permitted */
+#define DBITS_CONFORM 0x00000400 /* conforming code segment */
+#define DBITS_READ    0x00000200 /* read from code segment is permitted */
 
 
 /*
@@ -74,30 +77,26 @@
 
 
 /* Descriptor of Task State Segment - used in CPU context switching */
-#define DESCR_TSS    (DBITS_1B | DBITS_PRESENT | DBITS_DPL0 | DBITS_SYSTEM | 0x00000900)
+#define DESCR_TSS (DBITS_1B | DBITS_PRESENT | DBITS_DPL0 | DBITS_SYSTEM | 0x00000900)
 
 /* Descriptor of user task code segment */
-#define DESCR_UCODE  (DBITS_4KB | DBITS_CODE32 | DBITS_PRESENT | DBITS_DPL3 | DBITS_APP | DBITS_CODE | DBITS_READ)
+#define DESCR_UCODE (DBITS_4KB | DBITS_CODE32 | DBITS_PRESENT | DBITS_DPL3 | DBITS_APP | DBITS_CODE | DBITS_READ)
 
 /* Descriptor of user task data segment */
-#define DESCR_UDATA  (DBITS_4KB | DBITS_CODE32 | DBITS_PRESENT | DBITS_DPL3 | DBITS_APP | DBITS_DATA | DBITS_WRT)
-
+#define DESCR_UDATA (DBITS_4KB | DBITS_CODE32 | DBITS_PRESENT | DBITS_DPL3 | DBITS_APP | DBITS_DATA | DBITS_WRT)
 
 /* Descriptor of user task code segment */
-#define DESCR_KCODE  (DBITS_4KB | DBITS_CODE32 | DBITS_PRESENT | DBITS_DPL0 | DBITS_APP | DBITS_CODE | DBITS_READ)
+#define DESCR_KCODE (DBITS_4KB | DBITS_CODE32 | DBITS_PRESENT | DBITS_DPL0 | DBITS_APP | DBITS_CODE | DBITS_READ)
 
 /* Descriptor of user task data segment */
-#define DESCR_KDATA  (DBITS_4KB | DBITS_PRESENT | DBITS_DPL0 | DBITS_APP | DBITS_DATA | DBITS_WRT)
+#define DESCR_KDATA (DBITS_4KB | DBITS_PRESENT | DBITS_DPL0 | DBITS_APP | DBITS_DATA | DBITS_WRT)
 
 
 /* Segment selectors */
-#define SEL_KCODE    8
-#define SEL_KDATA    16
-#define SEL_UCODE    27
-#define SEL_UDATA    35
-
-
-#define NULL 0
+#define SEL_KCODE 8
+#define SEL_KDATA 16
+#define SEL_UCODE 27
+#define SEL_UDATA 35
 
 
 #ifndef __ASSEMBLY__
@@ -121,34 +120,6 @@
 		ustack += ((sizeof(t) + 3) & ~3); \
 	} while (0)
 
-
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long long u64;
-
-typedef char s8;
-typedef short s16;
-typedef int s32;
-typedef long long s64;
-
-typedef u32 addr_t;
-typedef u64 cycles_t;
-
-typedef u64 usec_t;
-typedef s64 offs_t;
-
-typedef unsigned int size_t;
-typedef unsigned long long time_t;
-
-typedef u32 ptr_t;
-
-/* Object identifier - contains server port and object id */
-typedef u64 id_t;
-typedef struct _oid_t {
-	u32 port;
-	id_t id;
-} oid_t;
 
 #pragma pack(push, 1)
 
@@ -228,30 +199,20 @@ static inline u8 hal_inb(void *addr)
 {
 	u8 b;
 
-	__asm__ volatile
-	(" \
-		movl %1, %%edx; \
-		inb %%dx, %%al; \
-		movb %%al, %0;" \
-	:"=b" (b) \
-	:"g" (addr) \
-	:"edx", "eax");
+	__asm__ volatile(
+		"inb %1, %0; "
+	: "=a" (b)
+	: "Nd" (addr));
+
 	return b;
 }
 
 
 static inline void hal_outb(void *addr, u8 b)
 {
-	__asm__ volatile
-	(" \
-		movl %0, %%edx; \
-		movb %1, %%al; \
-		outb %%al, %%dx"
-	:
-	:"g" (addr), "b" (b)
-	:"eax", "edx");
-
-	return;
+	__asm__ volatile(
+		"outb %0, %1; "
+	:: "a" (b), "Nd" (addr));
 }
 
 
@@ -259,14 +220,10 @@ static inline u16 hal_inw(void *addr)
 {
 	u16 w;
 
-	__asm__ volatile
-	(" \
-		movl %1, %%edx; \
-		inw %%dx, %%ax; \
-		movw %%ax, %0;" \
-	:"=g" (w) \
-	:"g" (addr) \
-	:"edx", "eax");
+	__asm__ volatile(
+		"inw %1, %0; "
+	: "=a" (w)
+	: "Nd" (addr));
 
 	return w;
 }
@@ -274,16 +231,9 @@ static inline u16 hal_inw(void *addr)
 
 static inline void hal_outw(void *addr, u16 w)
 {
-	__asm__ volatile
-	(" \
-		movl %0, %%edx; \
-		movw %1, %%ax; \
-		outw %%ax, %%dx"
-		:
-		:"g" (addr), "g" (w)
-		:"eax", "edx");
-
-	return;
+	__asm__ volatile(
+		"outw %0, %1; "
+	:: "a" (w), "Nd" (addr));
 }
 
 
@@ -291,14 +241,10 @@ static inline u32 hal_inl(void *addr)
 {
 	u32 l;
 
-	__asm__ volatile
-	(" \
-		movl %1, %%edx; \
-		inl %%dx, %%eax; \
-		movl %%eax, %0;" \
-		:"=g" (l) \
-		:"g" (addr) \
-		:"eax", "edx", "memory");
+	__asm__ volatile(
+		"inl %1, %0; "
+	: "=a" (l)
+	: "Nd" (addr));
 
 	return l;
 }
@@ -306,16 +252,9 @@ static inline u32 hal_inl(void *addr)
 
 static inline void hal_outl(void *addr, u32 l)
 {
-	__asm__ volatile
-	(" \
-		movl %0, %%edx; \
-		movl %1, %%eax; \
-		outl %%eax, %%dx"
-		:
-		:"g" (addr), "g" (l)
-		:"eax", "edx");
-
-	return;
+	__asm__ volatile(
+		"outl %0, %1; "
+	:: "a" (l), "Nd" (addr));
 }
 
 

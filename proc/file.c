@@ -41,7 +41,7 @@ int proc_fileAdd(unsigned int *h, oid_t *oid, unsigned mode)
 }
 
 
-int proc_fileSet(unsigned int h, char flags, oid_t *oid, offs_t offs, unsigned mode)
+int proc_fileSet(unsigned int h, char flags, oid_t *oid, off_t offs, unsigned mode)
 {
 #if 0
 	process_t *process;
@@ -70,7 +70,7 @@ int proc_fileSet(unsigned int h, char flags, oid_t *oid, offs_t offs, unsigned m
 }
 
 
-int proc_fileGet(unsigned int h, char flags, oid_t *oid, offs_t *offs, unsigned *mode)
+int proc_fileGet(unsigned int h, char flags, oid_t *oid, off_t *offs, unsigned *mode)
 {
 #if 0
 	process_t *process;

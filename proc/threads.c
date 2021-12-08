@@ -667,7 +667,7 @@ static unsigned _thread_alloc(unsigned id)
 
 		for (;; p = lib_treeof(thread_t, idlinkage, p->idlinkage.parent)) {
 			if (p->idlinkage.parent == NULL)
-				return NULL;
+				return 0;
 
 			if ((p == lib_treeof(thread_t, idlinkage, p->idlinkage.parent->left)) && lib_treeof(thread_t, idlinkage, p->idlinkage.parent)->rgap)
 				break;
@@ -985,7 +985,7 @@ static int _proc_threadWait(thread_t **queue, time_t timeout, spinlock_ctx_t *sc
 }
 
 
-int proc_threadSleep(unsigned long long us)
+int proc_threadSleep(time_t us)
 {
 	thread_t *current;
 	int err;
@@ -1613,10 +1613,10 @@ int _threads_init(vm_map_t *kmap, vm_object_t *kernel)
 	hal_interruptsSetHandler(&threads_common.pendsvHandler);
 #endif
 
-	hal_memset(&threads_common.timeintrHandler, NULL, sizeof(threads_common.timeintrHandler));
+	hal_memset(&threads_common.timeintrHandler, 0, sizeof(threads_common.timeintrHandler));
 	threads_common.timeintrHandler.f = threads_timeintr;
 
-	hal_memset(&threads_common.scheduleHandler, NULL, sizeof(threads_common.scheduleHandler));
+	hal_memset(&threads_common.scheduleHandler, 0, sizeof(threads_common.scheduleHandler));
 	threads_common.scheduleHandler.f = threads_schedule;
 
 #ifdef HPTIMER_IRQ

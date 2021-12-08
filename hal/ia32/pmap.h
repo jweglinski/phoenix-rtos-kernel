@@ -74,7 +74,7 @@ typedef struct _page_t {
 
 
 typedef struct _pmap_t {
-	u32 *pdir;
+	addr_t *pdir;
 	addr_t cr3;
 	void *start;
 	void *end;
@@ -133,6 +133,8 @@ extern void pmap_getAllocatedSegment(void *memStart, void *memStop, void **segSt
 
 extern void _pmap_init(pmap_t *pmap, void **start, void **end);
 
+
 #endif
+
 
 #endif

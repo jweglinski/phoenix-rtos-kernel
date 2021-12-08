@@ -16,7 +16,7 @@
 #ifndef _POSIX_FDPASS_H_
 #define _POSIX_FDPASS_H_
 
-#include "posix_private.h"
+#include "private.h"
 
 
 #define MAX_MSG_CONTROLLEN 256
@@ -30,12 +30,13 @@ typedef struct fdpack_s {
 } fdpack_t;
 
 
-extern int fdpass_pack(fdpack_t **packs, const void *control, socklen_t controllen);
+extern int fdpass_pack(fdpack_t **packs, const struct msghdr *msg);
 
 
-extern int fdpass_unpack(fdpack_t **packs, void *control, socklen_t *controllen);
+extern int fdpass_unpack(fdpack_t **packs, struct msghdr *msg);
 
 
 extern int fdpass_discard(fdpack_t **packs);
+
 
 #endif

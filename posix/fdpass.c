@@ -16,45 +16,32 @@
 #include "fdpass.h"
 
 
-#define CMSG_ALIGN(n)       (((n) + sizeof(socklen_t) - 1) & ~(sizeof(socklen_t) - 1))
-#define CMSG_SPACE(n)       (sizeof(struct cmsghdr) + CMSG_ALIGN(n))
-#define CMSG_LEN(n)         (sizeof(struct cmsghdr) + (n))
-#define CMSG_DATA(c)        ((unsigned char *)((struct cmsghdr *)(c) + 1))
-#define CMSG_FIRSTHDR(d, l) ((l) < sizeof(struct cmsghdr) ? NULL : (struct cmsghdr *)(d))
-
-#define CMSG_NXTHDR(d, l, c) \
-	({ \
-		struct cmsghdr *_c = (struct cmsghdr *)(c); \
-		char *_n = (char *)_c + CMSG_SPACE(_c->cmsg_len); \
-		char *_e = (char *)(d) + (l); \
-		(_n > _e ? (struct cmsghdr *)NULL : (struct cmsghdr *)_n); \
-	})
-
-
 #define FDPACK_PUSH(p, of, fl) \
-	do { \
+	({ \
 		(p)->fd[(p)->first + (p)->cnt].file = of; \
 		(p)->fd[(p)->first + (p)->cnt].flags = fl; \
 		++(p)->cnt; \
-	} while (0)
+	})
+
 
 #define FDPACK_POP_FILE(p, of) \
-	do { \
+	({ \
 		(of) = (p)->fd[(p)->first].file; \
 		++(p)->first; \
 		--(p)->cnt; \
-	} while (0)
+	})
+
 
 #define FDPACK_POP_FILE_AND_FLAGS(p, of, fl) \
-	do { \
+	({ \
 		(of) = (p)->fd[(p)->first].file; \
 		(fl) = (p)->fd[(p)->first].flags; \
 		++(p)->first; \
 		--(p)->cnt; \
-	} while (0)
+	})
 
 
-int fdpass_pack(fdpack_t **packs, const void *control, socklen_t controllen)
+int fdpass_pack(fdpack_t **packs, const struct msghdr *msg)
 {
 	fdpack_t *pack;
 	struct cmsghdr *cmsg;
@@ -63,11 +50,11 @@ int fdpass_pack(fdpack_t **packs, const void *control, socklen_t controllen)
 	unsigned int cnt, tot_cnt;
 	int fd, err;
 
-	if (controllen > MAX_MSG_CONTROLLEN)
+	if (msg->msg_controllen > MAX_MSG_CONTROLLEN)
 		return -ENOMEM;
 
 	/* calculate total number of file descriptors */
-	for (tot_cnt = 0, cmsg = CMSG_FIRSTHDR(control, controllen); cmsg; cmsg = CMSG_NXTHDR(control, controllen, cmsg)) {
+	for (tot_cnt = 0, cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg)) {
 		cmsg_data = CMSG_DATA(cmsg);
 		cmsg_end = (unsigned char *)cmsg + cmsg->cmsg_len;
 		cnt = (cmsg_end - cmsg_data) / sizeof(int);
@@ -92,7 +79,7 @@ int fdpass_pack(fdpack_t **packs, const void *control, socklen_t controllen)
 	LIST_ADD(packs, pack);
 
 	/* reference and pack file descriptors */
-	for (cmsg = CMSG_FIRSTHDR(control, controllen); cmsg; cmsg = CMSG_NXTHDR(control, controllen, cmsg)) {
+	for (cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg)) {
 		cmsg_data = CMSG_DATA(cmsg);
 		cmsg_end = (unsigned char *)cmsg + cmsg->cmsg_len;
 		cnt = (cmsg_end - cmsg_data) / sizeof(int);
@@ -117,7 +104,7 @@ int fdpass_pack(fdpack_t **packs, const void *control, socklen_t controllen)
 }
 
 
-int fdpass_unpack(fdpack_t **packs, void *control, socklen_t *controllen)
+int fdpass_unpack(fdpack_t **packs, struct msghdr *msg)
 {
 	process_info_t *p;
 	fdpack_t *pack;
@@ -127,8 +114,8 @@ int fdpass_unpack(fdpack_t **packs, void *control, socklen_t *controllen)
 	unsigned int cnt, flags;
 	int fd;
 
-	if (!(*packs) || *controllen < CMSG_LEN(sizeof(int))) {
-		*controllen = 0;
+	if ((*packs == NULL) || (msg->msg_controllen < CMSG_LEN(sizeof(int)))) {
+		msg->msg_controllen = 0;
 		return 0;
 	}
 
@@ -137,7 +124,7 @@ int fdpass_unpack(fdpack_t **packs, void *control, socklen_t *controllen)
 
 	proc_lockSet(&p->lock);
 
-	cmsg = CMSG_FIRSTHDR(control, *controllen);
+	cmsg = CMSG_FIRSTHDR(msg);
 	cmsg_data = CMSG_DATA(cmsg);
 
 	cmsg->cmsg_level = SOL_SOCKET;
@@ -147,7 +134,7 @@ int fdpass_unpack(fdpack_t **packs, void *control, socklen_t *controllen)
 	cnt = 0;
 
 	/* unpack and add file descriptors */
-	while (pack && pack->cnt && *controllen >= CMSG_LEN(sizeof(int) * (cnt + 1))) {
+	while ((pack != NULL) && (pack->cnt > 0) && (msg->msg_controllen >= CMSG_LEN(sizeof(int) * (cnt + 1)))) {
 		FDPACK_POP_FILE_AND_FLAGS(pack, file, flags);
 
 		fd = _posix_addOpenFile(p, file, flags);
@@ -167,7 +154,7 @@ int fdpass_unpack(fdpack_t **packs, void *control, socklen_t *controllen)
 		}
 	}
 
-	*controllen = cmsg->cmsg_len = CMSG_LEN(sizeof(int) * cnt);
+	msg->msg_controllen = cmsg->cmsg_len = CMSG_LEN(sizeof(int) * cnt);
 
 	proc_lockClear(&p->lock);
 	pinfo_put(p);
@@ -186,8 +173,8 @@ int fdpass_discard(fdpack_t **packs)
 
 	proc_lockSet(&p->lock);
 
-	while ((pack = *packs)) {
-		while (pack->cnt) {
+	while ((pack = *packs) != NULL) {
+		while (pack->cnt > 0) {
 			FDPACK_POP_FILE(pack, file);
 			posix_fileDeref(file);
 		}

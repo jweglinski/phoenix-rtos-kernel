@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * Error definitions
+ * System error definitions
  *
  * Copyright 2012-2015, 2016-2017 Phoenix Systems
  * Author: Pawel Pisarczyk, Pawel Kolodziej, Jacek Popko
@@ -15,6 +15,7 @@
 
 #ifndef _PHOENIX_ERRNO_H_
 #define _PHOENIX_ERRNO_H_
+
 
 #define EOK           0      /* No error */
 #define EPERM         1      /* Operation not permitted */
@@ -66,5 +67,6 @@
 #define EISCONN         106
 #define ENOTCONN        107
 #define ECONNREFUSED    111
+
 
 #endif

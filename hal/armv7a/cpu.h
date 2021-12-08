@@ -80,7 +80,7 @@ typedef u32 addr_t;
 typedef u32 cycles_t;
 
 typedef u64 usec_t;
-typedef s64 offs_t;
+typedef s64 off_t;
 
 typedef unsigned int size_t;
 typedef unsigned long long time_t;

@@ -66,7 +66,7 @@ typedef u64 addr_t;
 typedef u64 cycles_t;
 
 typedef u64 usec_t;
-typedef s64 offs_t;
+typedef s64 off_t;
 
 typedef unsigned long size_t;
 typedef unsigned long long time_t;

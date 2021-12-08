@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * Memory management
+ * System memory management
  *
  * Copyright 2018 Phoenix Systems
  * Author: Jan Sikorski

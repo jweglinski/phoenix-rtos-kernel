@@ -65,7 +65,7 @@ addr_t pmap_destroy(pmap_t *pmap, int *i)
 	int kernel = ((VADDR_KERNEL + SIZE_PAGE) & ~(SIZE_PAGE - 1)) >> 22;
 
 	while (*i < kernel) {
-		if (pmap->pdir[*i] != NULL)
+		if (pmap->pdir[*i])
 			return pmap->pdir[(*i)++] & ~0xfff;
 		(*i)++;
 	}

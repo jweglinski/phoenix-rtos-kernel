@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * Signals
+ * System signals
  *
  * Copyright 2018 Phoenix Systems
  * Author: Jan Sikorski
@@ -13,10 +13,11 @@
  * %LICENSE%
  */
 
-
 #ifndef _PHOENIX_SIGNAL_H_
 #define _PHOENIX_SIGNAL_H_
 
+
 enum { signal_kill = 1, signal_segv, signal_illegal };
+
 
 #endif

@@ -5,8 +5,8 @@
  *
  * Standard routines - doubly-linked list
  *
- * Copyright 2017, 2018 Phoenix Systems
- * Author: Pawel Pisarczyk, Jan Sikorski, Aleksander Kaminski
+ * Copyright 2017, 2018, 2021 Phoenix Systems
+ * Author: Pawel Pisarczyk, Jan Sikorski, Aleksander Kaminski, Lukasz Kosinski
  *
  * This file is part of Phoenix-RTOS.
  *
@@ -17,20 +17,24 @@
 #include "list.h"
 
 
+#define NODE(t, off) (*(void **)((ptr_t)t + off))
+
+
 void lib_listAdd(void **list, void *t, size_t noff, size_t poff)
 {
 	if (t == NULL)
 		return;
+
 	if (*list == NULL) {
-		*((addr_t *)(t + noff)) = (addr_t)t;
-		*((addr_t *)(t + poff)) = (addr_t)t;
+		NODE(t, poff) = t;
+		NODE(t, noff) = t;
 		*list = t;
 	}
 	else {
-		*((addr_t *)(t + poff)) = *((addr_t *)(*list + poff));
-		*((addr_t *)((void *)*((addr_t *)(*list + poff)) + noff)) = (addr_t)t;
-		*((addr_t *)(t + noff)) = *((addr_t *)list);
-		*((addr_t *)(*list + poff)) = (addr_t)t;
+		NODE(t, poff) = NODE(*list, poff);
+		NODE(NODE(*list, poff), noff) = t;
+		NODE(t, noff) = *list;
+		NODE(*list, poff) = t;
 	}
 }
 
@@ -39,15 +43,18 @@ void lib_listRemove(void **list, void *t, size_t noff, size_t poff)
 {
 	if (t == NULL)
 		return;
-	if (*((addr_t *)(t + noff)) == (addr_t)t && *((addr_t *)(t + poff)) == (addr_t)t) {
+
+	if ((NODE(t, poff) == t) && (NODE(t, noff) == t)) {
 		*list = NULL;
 	}
 	else {
-		*((addr_t *)((void *)(*((addr_t *)(t + poff))) + noff)) = *((addr_t *)(t + noff));
-		*((addr_t *)((void *)(*((addr_t *)(t + noff))) + poff)) = *((addr_t *)(t + poff));
+		NODE(NODE(t, poff), noff) = NODE(t, noff);
+		NODE(NODE(t, noff), poff) = NODE(t, poff);
+
 		if (t == *list)
-			*list = (void *)*((addr_t *)(t + noff));
+			*list = NODE(t, noff);
 	}
-	*((addr_t *)(t + noff)) = NULL;
-	*((addr_t *)(t + poff)) = NULL;
+
+	NODE(t, noff) = NULL;
+	NODE(t, poff) = NULL;
 }

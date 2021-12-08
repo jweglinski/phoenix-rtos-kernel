@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * POSIX-compatibility module
+ * POSIX compatibility module
  *
  * Copyright 2018 Phoenix Systems
  * Author: Jan Sikorski, Michal Miroslaw
@@ -14,14 +14,13 @@
  */
 
 #include HAL
+#include "posix.h"
+#include "private.h"
 #include "../include/errno.h"
 #include "../include/ioctl.h"
-#include "../include/limits.h"
+#include "../lib/cbuffer.h"
 #include "../proc/proc.h"
 
-#include "posix.h"
-#include "posix_private.h"
-#include "../lib/cbuffer.h"
 
 #ifdef CPU_STM32
 #define MAX_FD_COUNT 8
@@ -33,30 +32,6 @@
 #define TRACE(str, ...)
 
 #define POLL_INTERVAL 100000
-
-
-enum { atMode = 0, atUid, atGid, atSize, atType, atPort, atPollStatus, atEventMask, atCTime, atMTime, atATime, atLinks, atDev };
-
-
-/* TODO: copied from libphoenix/posixsrv/posixsrv.h */
-enum { evAdd = 0x1, evDelete = 0x2, evEnable = 0x4, evDisable = 0x8, evOneshot = 0x10, evClear = 0x20, evDispatch = 0x40 };
-
-typedef struct {
-	oid_t oid;
-	unsigned flags;
-	unsigned short types;
-} evsub_t;
-
-
-typedef struct _event_t {
-	oid_t oid;
-	unsigned type;
-
-	unsigned flags;
-	unsigned count;
-	unsigned data;
-} event_t;
-
 
 
 struct {
@@ -513,7 +488,7 @@ int posix_open(const char *filename, int oflag, char *ustack)
 			else if (err == -ENOENT && oflag & O_CREAT) {
 				GETFROMSTACK(ustack, mode_t, mode, 2);
 
-				if (posix_create(filename, 1 /* otFile */, mode | S_IFREG, dev, &oid) < 0) {
+				if (posix_create(filename, otFile, mode | S_IFREG, dev, &oid) < 0) {
 					err = -EIO;
 					break;
 				}
@@ -880,7 +855,7 @@ int posix_mkfifo(const char *pathname, mode_t mode)
 		return -EIO;
 
 	/* create pipe in filesystem */
-	if (posix_create(pathname, 2 /* otDev */, mode | S_IFIFO, oid, &file) < 0)
+	if (posix_create(pathname, otDev, mode | S_IFIFO, oid, &file) < 0)
 		return -EIO;
 
 	return 0;
@@ -1337,20 +1312,6 @@ int posix_fcntl(int fd, unsigned int cmd, char *ustack)
 
 	return err;
 }
-
-
-#define IOCPARM_MASK		0x1fff
-#define IOCPARM_LEN(x)		(((x) >> 16) & IOCPARM_MASK)
-
-
-#define IOC_OUT				0x40000000
-#define IOC_IN				0x80000000
-#define IOC_INOUT			(IOC_IN | IOC_OUT)
-
-#define _IOC(inout,group,num,len)	((unsigned long) (inout | ((len & IOCPARM_MASK) << 16) | ((group) << 8) | (num)))
-#define SIOCGIFCONF			_IOC(IOC_INOUT, 'S', 0x12, sizeof(struct ifconf))
-#define SIOCADDRT			_IOC(IOC_IN, 'S', 0x44, sizeof(struct rtentry))
-#define SIOCDELRT			_IOC(IOC_IN, 'S', 0x45, sizeof(struct rtentry))
 
 
 void ioctl_pack(msg_t *msg, unsigned long request, void *data, id_t id)
@@ -2219,7 +2180,7 @@ int posix_tkill(pid_t pid, int tid, int sig)
 
 void posix_sigchild(pid_t ppid)
 {
-	posix_tkill(ppid, NULL, SIGCHLD);
+	posix_tkill(ppid, 0, SIGCHLD);
 }
 
 

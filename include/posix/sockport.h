@@ -1,39 +1,39 @@
 /*
  * Phoenix-RTOS
  *
- * libphoenix
+ * Operating system kernel
  *
- * sys/sockport.h
+ * POSIX sockets port
  *
- * Copyright 2018 Phoenix Systems
- * Author: Michał Mirosław
+ * Copyright 2018, 2021 Phoenix Systems
+ * Author: Michał Mirosław, Lukasz Kosinski
  *
  * This file is part of Phoenix-RTOS.
  *
  * %LICENSE%
  */
 
-#ifndef _SYS_SOCKPORT_H_
-#define _SYS_SOCKPORT_H_
+#ifndef _PHOENIX_POSIX_SOCKPORT_H_
+#define _PHOENIX_POSIX_SOCKPORT_H_
 
-#include "../proc/msg.h"
-#include "sockdefs.h"
+#include "types.h"
+#include "../msg.h"
+
+
+#define PATH_SOCKSRV "/dev/netsocket"
+#define MAX_SOCKNAME_LEN (sizeof(((msg_t *)0)->o.raw) - sizeof(ssize_t) - sizeof(size_t))
+
 
 enum {
 	sockmSocket = 0x50c30000, sockmShutdown,
 	sockmConnect, sockmBind, sockmListen, sockmAccept,
 	sockmSend, sockmRecv, sockmGetSockName, sockmGetPeerName,
 	sockmGetFl, sockmSetFl, sockmGetOpt, sockmSetOpt,
-	sockmGetNameInfo, sockmGetAddrInfo,
+	sockmGetNameInfo, sockmGetAddrInfo, sockmGetIfAddrs
 };
 
-enum { MAX_SOCKNAME_LEN = sizeof(((msg_t *)0)->o.raw) - 2 * sizeof(size_t) };
 
-
-#define PATH_SOCKSRV "/dev/netsocket"
-
-
-typedef union sockport_msg_ {
+typedef union {
 	struct {
 		int domain, type, protocol, flags;
 		size_t ai_node_sz;
@@ -53,7 +53,7 @@ typedef union sockport_msg_ {
 } sockport_msg_t;
 
 
-typedef struct sockport_resp_ {
+typedef struct {
 	ssize_t ret;
 	union {
 		struct {
@@ -65,7 +65,7 @@ typedef struct sockport_resp_ {
 			size_t servlen;
 		} nameinfo;
 		struct {
-			int errno;
+			int err;
 			size_t buflen;
 		} sys;
 	};

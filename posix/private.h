@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * Private
+ * Private header
  *
  * Copyright 2021 Phoenix Systems
  * Author: Pawel Pisarczyk
@@ -17,54 +17,11 @@
 #define _POSIX_POSIX_PRIVATE_H_
 
 #include HAL
-#include "../include/posix.h"
 #include "../proc/proc.h"
 #include "posix.h"
 
 
 #define US_PORT (-1) /* FIXME */
-
-
-#define SIGHUP     1
-#define SIGINT     2
-#define SIGQUIT    3
-#define SIGILL     4
-#define SIGTRAP    5
-#define SIGABRT    6
-#define SIGIOT     SIGABRT
-#define SIGEMT     7
-#define SIGFPE     8
-#define SIGKILL    9
-#define SIGBUS    10
-#define SIGSEGV   11
-#define SIGSYS    12
-#define SIGPIPE   13
-#define SIGALRM   14
-#define SIGTERM   15
-#define SIGURG    16
-#define SIGSTOP   17
-#define SIGTSTP   18
-#define SIGCONT   19
-#define SIGCHLD   20
-#define SIGTTIN   21
-#define SIGTTOU   22
-#define SIGIO     23
-#define SIGXCPU   24
-#define SIGXFSZ   25
-#define SIGVTALRM 26
-#define SIGPROF   27
-#define SIGWINCH  28
-#define SIGINFO   29
-#define SIGUSR1   30
-#define SIGUSR2   31
-
-#define NSIG 32
-
-#define SIG_ERR (-1)
-#define SIG_DFL (-2)
-#define SIG_IGN (-3)
-
-#define HOST_NAME_MAX 255
 
 
 enum { ftRegular, ftPipe, ftFifo, ftInetSocket, ftUnixSocket, ftTty };
@@ -110,26 +67,6 @@ typedef struct _process_info_t {
 	fildes_t *fds;
 } process_info_t;
 
-
-/* SIOCGIFCONF ioctl special case: arg is structure with pointer */
-struct ifconf {
-	int ifc_len;    /* size of buffer */
-	char *ifc_buf;  /* buffer address */
-};
-
-/* SIOADDRT and SIOCDELRT ioctls special case: arg is structure with pointer */
-struct rtentry
-{
-	struct sockaddr rt_dst;
-    struct sockaddr rt_gateway;
-    struct sockaddr rt_genmask;
-    short           rt_flags;
-    short           rt_metric;
-    char            *rt_dev;
-    unsigned long   rt_mss;
-    unsigned long   rt_window;
-    unsigned short  rt_irtt;
-};
 
 extern void splitname(char *path, char **base, char **dir);
 
@@ -258,5 +195,6 @@ extern int unix_close(unsigned socket);
 
 
 extern void unix_sockets_init(void);
+
 
 #endif

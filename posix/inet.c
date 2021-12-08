@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * POSIX-compatibility module, inet sockets
+ * POSIX compatibility module, inet sockets
  *
  * Copyright 2018 Phoenix Systems
  * Author: Michal Miroslaw, Jan Sikorski
@@ -15,10 +15,9 @@
 
 #include HAL
 #include "../include/errno.h"
+#include "../include/posix/socket.h"
+#include "../include/posix/sockport.h"
 #include "../proc/proc.h"
-
-#include "posix.h"
-#include "posix_private.h"
 
 
 static int socksrvcall(msg_t *msg)

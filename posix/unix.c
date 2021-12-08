@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * POSIX-compatibility module, UNIX sockets
+ * POSIX compatibility module, UNIX sockets
  *
  * Copyright 2018, 2020 Phoenix Systems
  * Author: Jan Sikorski, Pawel Pisarczyk
@@ -17,14 +17,13 @@
 #include "../proc/proc.h"
 #include "../lib/lib.h"
 
-#include "posix.h"
-#include "posix_private.h"
+#include "private.h"
 #include "fdpass.h"
 
 
-#define US_BOUND (1 << 0)
-#define US_LISTENING (1 << 1)
-#define US_ACCEPTING (1 << 2)
+#define US_BOUND      (1 << 0)
+#define US_LISTENING  (1 << 1)
+#define US_ACCEPTING  (1 << 2)
 #define US_CONNECTING (1 << 3)
 
 
@@ -58,7 +57,6 @@ static struct {
 	rbtree_t tree;
 	lock_t lock;
 } unix_common;
-
 
 
 static int unixsock_cmp(rbnode_t *n1, rbnode_t *n2)
@@ -428,7 +426,7 @@ int unix_bind(unsigned socket, const struct sockaddr *address, socklen_t address
 
 			dev.port = US_PORT;
 			dev.id = socket;
-			err = proc_create(odir.port, 2 /* otDev */, S_IFSOCK, dev, odir, name, &dev);
+			err = proc_create(odir.port, otDev, S_IFSOCK, dev, odir, name, &dev);
 
 			if (err) {
 				if (s->type == SOCK_DGRAM) {
@@ -572,7 +570,7 @@ int unix_getsockopt(unsigned socket, int level, int optname, void *optval, sockl
 }
 
 
-static ssize_t recv(unsigned socket, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *src_len, void *control, socklen_t *controllen)
+static ssize_t recv(unsigned socket, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *src_len, struct msghdr *msg)
 {
 	unixsock_t *s;
 	size_t rlen = 0;
@@ -602,8 +600,8 @@ static ssize_t recv(unsigned socket, void *buf, size_t len, int flags, struct so
 				if (len < rlen)
 					_cbuffer_discard(&s->buffer, rlen - len);
 			}
-			if (err > 0 && control && controllen && *controllen > 0)
-				fdpass_unpack(&s->fdpacks, control, controllen);
+			if ((err > 0) && (msg != NULL) && (msg->msg_control != NULL) && (msg->msg_controllen > 0))
+				fdpass_unpack(&s->fdpacks, msg);
 			proc_lockClear(&s->lock);
 
 			if (err > 0) {
@@ -710,7 +708,7 @@ static ssize_t send(unsigned socket, const void *buf, size_t len, int flags, con
 
 ssize_t unix_recvfrom(unsigned socket, void *msg, size_t len, int flags, struct sockaddr *src_addr, socklen_t *src_len)
 {
-	return recv(socket, msg, len, flags, src_addr, src_len, NULL, NULL);
+	return recv(socket, msg, len, flags, src_addr, src_len, NULL);
 }
 
 
@@ -735,7 +733,7 @@ ssize_t unix_recvmsg(unsigned socket, struct msghdr *msg, int flags)
 		len = msg->msg_iov->iov_len;
 	}
 
-	err = recv(socket, buf, len, flags, msg->msg_name, &msg->msg_namelen, msg->msg_control, &msg->msg_controllen);
+	err = recv(socket, buf, len, flags, msg->msg_name, &msg->msg_namelen, msg);
 
 	if (err >= 0) {
 		/* output flags are not supported */
@@ -758,7 +756,7 @@ ssize_t unix_sendmsg(unsigned socket, const struct msghdr *msg, int flags)
 		return -EINVAL;
 
 	if (msg->msg_controllen > 0) {
-		if ((err = fdpass_pack(&fdpack, msg->msg_control, msg->msg_controllen)) < 0)
+		if ((err = fdpass_pack(&fdpack, msg)) < 0)
 			return err;
 	}
 

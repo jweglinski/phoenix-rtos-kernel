@@ -3,7 +3,7 @@
  *
  * Operating system kernel
  *
- * IA32 basic peripherals control functions
+ * Platform control
  *
  * Copyright 2018, 2019, 2020 Phoenix Systems
  * Author: Aleksander Kaminski, Kamil Amanowicz, Lukasz Kosinski
@@ -13,13 +13,18 @@
  * %LICENSE%
  */
 
-#ifndef _PHOENIX_ARCH_IA32_H_
-#define _PHOENIX_ARCH_IA32_H_
+#ifndef _PHOENIX_ARCH_IA32_PCTL_H_
+#define _PHOENIX_ARCH_IA32_PCTL_H_
 
-#define PCI_ANY            0
-#define PCI_VENDOR_INTEL   0x8086
 
-#define PCTL_REBOOT_MAGIC 0xaa55aa55UL
+/* Reboot magic constant */
+#define PCTL_REBOOT_MAGIC 0xaa55aa55
+
+
+/* PCI vendor ID */
+#define PCI_ANY          0x0000 /* Any vendor ID */
+#define PCI_VENDOR_INTEL 0x8086 /* Intel */
+
 
 typedef struct {
 	unsigned short vendor;

@@ -137,7 +137,7 @@ int vm_objectPut(vm_object_t *o)
 }
 
 
-static page_t *object_fetch(oid_t oid, offs_t offs)
+static page_t *object_fetch(oid_t oid, off_t offs)
 {
 	page_t *p;
 	void *v;
@@ -170,7 +170,7 @@ static page_t *object_fetch(oid_t oid, offs_t offs)
 }
 
 
-page_t *vm_objectPage(vm_map_t *map, amap_t **amap, vm_object_t *o, void *vaddr, offs_t offs)
+page_t *vm_objectPage(vm_map_t *map, amap_t **amap, vm_object_t *o, void *vaddr, off_t offs)
 {
 	page_t *p;
 

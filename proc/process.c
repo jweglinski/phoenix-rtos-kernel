@@ -37,7 +37,7 @@ typedef struct {
 	thread_t *parent;
 
 	vm_object_t *object;
-	offs_t offset;
+	off_t offset;
 	size_t size;
 	vm_map_t *map;
 
@@ -160,7 +160,7 @@ static unsigned _process_alloc(unsigned id)
 
 		for (;; p = lib_treeof(process_t, idlinkage, p->idlinkage.parent)) {
 			if (p->idlinkage.parent == NULL)
-				return NULL;
+				return 0;
 
 			if ((p == lib_treeof(process_t, idlinkage, p->idlinkage.parent->left)) && lib_treeof(process_t, idlinkage, p->idlinkage.parent)->rgap)
 				break;
@@ -367,14 +367,14 @@ static void process_illegal(unsigned int n, exc_context_t *ctx)
 
 
 /* TODO - adding error handling and unmapping of already mapped segments */
-int process_load32(vm_map_t *map, vm_object_t *o, offs_t base, void *iehdr)
+int process_load32(vm_map_t *map, vm_object_t *o, off_t base, void *iehdr)
 {
 	void *vaddr = NULL;
 	size_t memsz = 0, filesz = 0;
 	Elf32_Ehdr *ehdr = iehdr;
 	Elf32_Phdr *phdr;
 	unsigned i, prot, flags, misalign = 0;
-	offs_t offs;
+	off_t offs;
 
 	for (i = 0, phdr = (void *)ehdr + ehdr->e_phoff; i < ehdr->e_phnum; i++, phdr++) {
 		if (phdr->p_type != PT_LOAD || phdr->p_vaddr == 0)
@@ -416,20 +416,20 @@ int process_load32(vm_map_t *map, vm_object_t *o, offs_t base, void *iehdr)
 }
 
 
-int process_load64(vm_map_t *map, vm_object_t *o, offs_t base, void *iehdr)
+int process_load64(vm_map_t *map, vm_object_t *o, off_t base, void *iehdr)
 {
 	void *vaddr = NULL;
 	size_t memsz = 0, filesz = 0;
 	Elf64_Ehdr *ehdr = iehdr;
 	Elf64_Phdr *phdr;
 	unsigned i, prot, flags, misalign = 0;
-	offs_t offs;
+	off_t offs;
 
 	for (i = 0, phdr = (void *)ehdr + ehdr->e_phoff; i < ehdr->e_phnum; i++, phdr++) {
 		if (phdr->p_type != PT_LOAD || phdr->p_vaddr == 0)
 			continue;
 
-		vaddr = (void *)((unsigned long)phdr->p_vaddr & ~(phdr->p_align - 1));
+		vaddr = (void *)(addr_t)(phdr->p_vaddr & ~(phdr->p_align - 1));
 		offs = phdr->p_offset & ~(phdr->p_align - 1);
 		misalign = phdr->p_offset & (phdr->p_align - 1);
 		filesz = phdr->p_filesz ? phdr->p_filesz + misalign : 0;
@@ -464,7 +464,7 @@ int process_load64(vm_map_t *map, vm_object_t *o, offs_t base, void *iehdr)
 }
 
 
-int process_load(process_t *process, vm_object_t *o, offs_t base, size_t size, void **ustack, void **entry)
+int process_load(process_t *process, vm_object_t *o, off_t base, size_t size, void **ustack, void **entry)
 {
 	void *stack;
 	Elf64_Ehdr *ehdr;
@@ -543,7 +543,7 @@ static int process_relocate(struct _reloc *reloc, size_t relocsz, char **addr)
 }
 
 
-int process_load(process_t *process, vm_object_t *o, offs_t base, size_t size, void **ustack, void **entry)
+int process_load(process_t *process, vm_object_t *o, off_t base, size_t size, void **ustack, void **entry)
 {
 	void *stack, *paddr;
 	Elf32_Ehdr *ehdr;
@@ -840,7 +840,7 @@ static void proc_spawnThread(void *arg)
 }
 
 
-int proc_spawn(vm_object_t *object, vm_map_t *map, offs_t offset, size_t size, const char *path, char **argv, char **envp)
+int proc_spawn(vm_object_t *object, vm_map_t *map, off_t offset, size_t size, const char *path, char **argv, char **envp)
 {
 	int pid;
 	process_spawn_t spawn;

@@ -3,21 +3,38 @@
  *
  * Operating system kernel
  *
- * Messages
+ * POSIX compatibility module
  *
- * Copyright 2018 Phoenix Systems
- * Author: Jan Sikorski
+ * Copyright 2018, 2021 Phoenix Systems
+ * Author: Jan Sikorski, Lukasz Kosinski
  *
  * This file is part of Phoenix-RTOS.
  *
  * %LICENSE%
  */
 
-#ifndef _PROC_POSIX_H_
-#define _PROC_POSIX_H_
+#ifndef _POSIX_POSIX_H_
+#define _POSIX_POSIX_H_
 
-#include "../include/posix.h"
-#include "sockport.h"
+#include HAL
+#include "../include/posix/endian.h"
+#include "../include/posix/events.h"
+#include "../include/posix/fcntl.h"
+#include "../include/posix/file.h"
+#include "../include/posix/iovec.h"
+#include "../include/posix/limits.h"
+#include "../include/posix/poll.h"
+#include "../include/posix/signal.h"
+#include "../include/posix/socket.h"
+#include "../include/posix/sockif.h"
+#include "../include/posix/sockios.h"
+#include "../include/posix/sockport.h"
+#include "../include/posix/sockrt.h"
+#include "../include/posix/stat.h"
+#include "../include/posix/stdio.h"
+#include "../include/posix/timespec.h"
+#include "../include/posix/timeval.h"
+#include "../include/posix/types.h"
 
 
 extern int posix_open(const char *filename, int oflag, char *ustack);

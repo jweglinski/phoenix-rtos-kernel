@@ -395,7 +395,7 @@ int proc_unlink(oid_t dir, oid_t oid, const char *name)
 }
 
 
-int proc_read(oid_t oid, offs_t offs, void *buf, size_t sz, unsigned mode)
+int proc_read(oid_t oid, off_t offs, void *buf, size_t sz, unsigned mode)
 {
 	int err;
 	msg_t *msg = vm_kmalloc(sizeof(msg_t));
@@ -424,7 +424,7 @@ int proc_read(oid_t oid, offs_t offs, void *buf, size_t sz, unsigned mode)
 }
 
 
-int proc_write(oid_t oid, offs_t offs, void *buf, size_t sz, unsigned mode)
+int proc_write(oid_t oid, off_t offs, void *buf, size_t sz, unsigned mode)
 {
 	int err;
 	msg_t *msg = vm_kmalloc(sizeof(msg_t));
@@ -453,9 +453,9 @@ int proc_write(oid_t oid, offs_t offs, void *buf, size_t sz, unsigned mode)
 }
 
 
-offs_t proc_size(oid_t oid)
+off_t proc_size(oid_t oid)
 {
-	offs_t err;
+	off_t err;
 	msg_t *msg = vm_kmalloc(sizeof(msg_t));
 
 	if (msg == NULL)
@@ -479,6 +479,6 @@ void _name_init(void)
 {
 	proc_lockInit(&name_common.dcache_lock);
 
-	hal_memset(name_common.dcache, NULL, sizeof(name_common.dcache));
+	hal_memset(name_common.dcache, 0, sizeof(name_common.dcache));
 	name_common.root_registered = 0;
 }

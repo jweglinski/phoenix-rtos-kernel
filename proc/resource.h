@@ -20,36 +20,26 @@
 #include "threads.h"
 
 
-#define resourceof(type, node_field, node) ({					\
-	long _off = (long) &(((type *) 0)->node_field);				\
-	resource_t *tmpnode = (node);					\
-	(type *) ((tmpnode == NULL) ? NULL : ((void *)tmpnode - _off));	\
+#define resourceof(type, node_field, node) ({ \
+	(type *)((node == NULL) ? NULL : (void *)((ptr_t)node - (ptr_t)&(((type *)0)->node_field))); \
 })
-
-
-typedef struct {
-	oid_t oid;
-	offs_t offs;
-	unsigned mode;
-} fd_t;
 
 
 enum { rtLock = 0, rtCond, rtFile, rtInth };
 
 
-typedef struct _resource_t {
+typedef struct {
 	rbnode_t linkage;
+	unsigned int refs;
 
-	unsigned refs;
-
-	unsigned lgap : 1;
-	unsigned rgap : 1;
-	unsigned type : 2;
-	unsigned id : 28;
+	unsigned int lgap : 1;
+	unsigned int rgap : 1;
+	unsigned int type : 2;
+	unsigned int id : 28;
 } resource_t;
 
 
-extern unsigned resource_alloc(process_t *process, resource_t *r, int type);
+extern unsigned int resource_alloc(process_t *process, resource_t *r, int type);
 
 
 extern resource_t *resource_get(process_t *process, int type, unsigned int id);
@@ -61,7 +51,7 @@ extern int resource_put(resource_t *r);
 extern void resource_unlink(process_t *process, resource_t *r);
 
 
-extern resource_t *resource_remove(process_t *process, unsigned id);
+extern resource_t *resource_remove(process_t *process, unsigned int id);
 
 
 extern resource_t *resource_removeNext(process_t *process);
@@ -70,12 +60,13 @@ extern resource_t *resource_removeNext(process_t *process);
 extern void _resource_init(process_t *process);
 
 
-extern int proc_resourceDestroy(process_t *process, unsigned id);
+extern int proc_resourceDestroy(process_t *process, unsigned int id);
 
 
 extern void proc_resourcesDestroy(process_t *process);
 
 
 extern int proc_resourcesCopy(process_t *source);
+
 
 #endif

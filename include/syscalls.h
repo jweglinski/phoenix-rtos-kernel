@@ -13,6 +13,10 @@
  * %LICENSE%
  */
 
+#ifndef _PHOENIX_SYSCALLS_H_
+#define _PHOENIX_SYSCALLS_H_
+
+
 #define SYSCALLS(ID) \
 	ID(debug) \
 	ID(mmap) \
@@ -120,3 +124,6 @@
 	ID(release) \
 	ID(sbi_putchar) \
 	ID(sbi_getchar)
+
+
+#endif

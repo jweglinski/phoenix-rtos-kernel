@@ -16,13 +16,11 @@
 #ifndef _LIB_RB_H_
 #define _LIB_RB_H_
 
-//#include HAL
+#include HAL
 
 
-#define lib_treeof(type, node_field, node) ({					\
-	long _off = (long) &(((type *) 0)->node_field);				\
-	rbnode_t *tmpnode = (node);					\
-	(type *) ((tmpnode == NULL) ? NULL : ((void *) tmpnode - _off));	\
+#define lib_treeof(type, node_field, node) ({ \
+	(type *)((node == NULL) ? NULL : (void *)((ptr_t)node - (ptr_t)&(((type *)0)->node_field))); \
 })
 
 

@@ -14,14 +14,14 @@
  * %LICENSE%
  */
 
-#include "../../include/errno.h"
-#include "../../include/arch/ia32.h"
 #include "cpu.h"
 #include "spinlock.h"
 #include "syspage.h"
 #include "string.h"
 #include "pmap.h"
 #include "pci.h"
+#include "../../include/errno.h"
+#include "../../include/pctl.h"
 
 
 extern int threads_schedule(unsigned int n, cpu_context_t *context, void *arg);

@@ -33,7 +33,7 @@ static int resource_cmp(rbnode_t *n1, rbnode_t *n2)
 }
 
 
-static unsigned _resource_alloc(rbtree_t *tree, unsigned id)
+static unsigned int _resource_alloc(rbtree_t *tree, unsigned int id)
 {
 	resource_t *r = lib_treeof(resource_t, linkage, tree->root);
 
@@ -56,7 +56,7 @@ static unsigned _resource_alloc(rbtree_t *tree, unsigned id)
 
 		for (;; r = lib_treeof(resource_t, linkage, r->linkage.parent)) {
 			if (r->linkage.parent == NULL)
-				return NULL;
+				return 0;
 
 			if ((r == lib_treeof(resource_t, linkage, r->linkage.parent->left)) && lib_treeof(resource_t, linkage, r->linkage.parent)->rgap)
 				break;
@@ -119,14 +119,14 @@ static void resource_augment(rbnode_t *node)
 }
 
 
-unsigned resource_alloc(process_t *process, resource_t *r, int type)
+unsigned int resource_alloc(process_t *process, resource_t *r, int type)
 {
 	r->type = type;
 	r->refs = 2;
 
 	proc_lockSet(&process->lock);
-	r->id = _resource_alloc(&process->resources, 1);
-	lib_rbInsert(&process->resources, &r->linkage);
+	if ((r->id = _resource_alloc(&process->resources, 1)))
+		lib_rbInsert(&process->resources, &r->linkage);
 	proc_lockClear(&process->lock);
 
 	return r->id;
@@ -162,7 +162,7 @@ void resource_unlink(process_t *process, resource_t *r)
 }
 
 
-resource_t *resource_remove(process_t *process, unsigned id)
+resource_t *resource_remove(process_t *process, unsigned int id)
 {
 	resource_t *r, t;
 	t.id = id;
@@ -217,7 +217,7 @@ int proc_resourcePut(resource_t *r)
 }
 
 
-int proc_resourceDestroy(process_t *process, unsigned id)
+int proc_resourceDestroy(process_t *process, unsigned int id)
 {
 	resource_t *r;
 

@@ -19,7 +19,6 @@
 #include "include/sysinfo.h"
 #include "include/mman.h"
 #include "include/syscalls.h"
-#include "include/posix.h"
 #include "lib/lib.h"
 #include "proc/proc.h"
 #include "vm/object.h"
@@ -53,7 +52,7 @@ void *syscalls_mmap(void *ustack)
 	size_t size;
 	int prot, flags;
 	oid_t *oid;
-	offs_t offs;
+	off_t offs;
 	vm_object_t *o;
 
 	GETFROMSTACK(ustack, void *, vaddr, 0);
@@ -61,7 +60,7 @@ void *syscalls_mmap(void *ustack)
 	GETFROMSTACK(ustack, int, prot, 2);
 	GETFROMSTACK(ustack, int, flags, 3);
 	GETFROMSTACK(ustack, oid_t *, oid, 4);
-	GETFROMSTACK(ustack, offs_t, offs, 5);
+	GETFROMSTACK(ustack, off_t, offs, 5);
 
 	if (oid == OID_NULL) {
 		o = NULL;
@@ -255,8 +254,8 @@ int syscalls_usleep(void *ustack)
 {
 	unsigned int us;
 
-	GETFROMSTACK(ustack, unsigned int, us, 0);
-	return proc_threadSleep((unsigned long long)us);
+	GETFROMSTACK(ustack, useconds_t, us, 0);
+	return proc_threadSleep((time_t)us);
 }
 
 
@@ -709,13 +708,13 @@ int syscalls_fileSet(void *ustack)
 	unsigned int h;
 	char flags;
 	oid_t *oid;
-	offs_t offs;
+	off_t offs;
 	unsigned mode;
 
 	GETFROMSTACK(ustack, unsigned int, h, 0);
 	GETFROMSTACK(ustack, char, flags, 1);
 	GETFROMSTACK(ustack, oid_t *, oid, 2);
-	GETFROMSTACK(ustack, offs_t, offs, 3);
+	GETFROMSTACK(ustack, off_t, offs, 3);
 	GETFROMSTACK(ustack, unsigned, mode, 4);
 
 	return proc_fileSet(h, flags, oid, offs, mode);
@@ -727,13 +726,13 @@ int syscalls_fileGet(void *ustack)
 	unsigned int h;
 	int flags;
 	oid_t *oid;
-	offs_t *offs;
+	off_t *offs;
 	unsigned *mode;
 
 	GETFROMSTACK(ustack, unsigned int, h, 0);
 	GETFROMSTACK(ustack, int, flags, 1);
 	GETFROMSTACK(ustack, oid_t *, oid, 2);
-	GETFROMSTACK(ustack, offs_t *, offs, 3);
+	GETFROMSTACK(ustack, off_t *, offs, 3);
 	GETFROMSTACK(ustack, unsigned *, mode, 4);
 
 	return proc_fileGet(h, flags, oid, offs, mode);
