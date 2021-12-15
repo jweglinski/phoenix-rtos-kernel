@@ -38,6 +38,7 @@ jobs:
           input: cpptestscan.bdf
           installDir: /home/buildtest/cpptest
           #testConfig: 'user://sum'
+          testConfig: 'builtin://MISRA C 2012'
           compilerConfig: gcc_9
           additionalParams: '-settings /home/buildtest/sarif.properties'
       - name: Upload results (SARIF)
