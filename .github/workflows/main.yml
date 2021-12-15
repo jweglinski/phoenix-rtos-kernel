@@ -37,7 +37,7 @@ jobs:
         with:
           input: cpptestscan.bdf
           installDir: /home/buildtest/cpptest
-          testConfig: 'user://sum'
+          #testConfig: 'user://sum'
           compilerConfig: gcc_9
           additionalParams: '-settings /home/buildtest/sarif.properties'
       - name: Upload results (SARIF)
